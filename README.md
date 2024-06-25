@@ -22,7 +22,7 @@
     npm install express body-parser axios dotenv
 
 4. create .env file in the root of your repository and provide your token, org name, and user to be notified
-    # env variable
+   
     GITHUB_TOKEN=YOUR_GITHUB_TOKEN
     ORG_NAME=YOUR_GITHUB_ORG_NAME
     PORT=3000
