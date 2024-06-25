@@ -49,7 +49,7 @@ To make this app listen to you GitHub Org. We need to do some settings.
 7. Click Add webhook.
 
 # Test the Solution
-1. Create a new Repository to trigger the Webhook and initialize with the ReadMe file(to create the first commit and default branch).
+1. Create a new Repository to trigger the Webhook.
 2. Go to the new repository created
 3. Navigate to Settings > Branches to verify that branch protection is applied.
 4. Check the Issues tab to verify that an issue was created with the expected title and body.
