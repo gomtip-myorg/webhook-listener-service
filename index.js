@@ -38,11 +38,36 @@ app.post('/webhook', async (req, res) => {
         const action = req.body.action;
         if (action === 'created') {
             console.log('Received repository event');
-            // Extract repository name and default branch from the request body
             const repoName = req.body.repository.name;
             const defaultBranch = req.body.repository.default_branch;
-            console.log('repoName : ' + repoName);
-            console.log('defaultBranch : ' + defaultBranch);
+            const readmeUrl = `https://api.github.com/repos/${ORG_NAME}/${repoName}/contents/README.md`;
+
+            try {
+                // Check if the default branch is created by checking if a README exists
+                await axios.get(readmeUrl, {
+                    headers: {
+                        Authorization: `token ${GITHUB_TOKEN}`,
+                        Accept: 'application/vnd.github.v3+json',
+                    },
+                });
+            } catch (error) {
+                // If README does not exist, create it to initialize the default branch
+                if (error.response && error.response.status === 404) {
+                    await axios.put(readmeUrl, {
+                        message: "Initialize repository",
+                        content: Buffer.from("# " + repoName).toString('base64'),
+                    }, {
+                        headers: {
+                            Authorization: `token ${GITHUB_TOKEN}`,
+                            Accept: 'application/vnd.github.v3+json',
+                        },
+                    });
+                } else {
+                    console.error(`Error checking/creating README: ${error.message}`);
+                    return res.status(500).send('Error initializing repository.');
+                }
+            }
+
             // Construct URL for setting branch protection
             const url = `https://api.github.com/repos/${ORG_NAME}/${repoName}/branches/${defaultBranch}/protection`;
 
@@ -52,7 +77,6 @@ app.post('/webhook', async (req, res) => {
                 enforce_admins: true,
                 required_pull_request_reviews: {
                     required_approving_review_count: 1,
-                    require_code_owner_reviews: true,
                 },
                 restrictions: null,
             };
